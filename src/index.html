@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Monthly Revenue</title>
+  <link rel="stylesheet" href="style.css"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+</head>
+<body>
+  <h1>Monthly Revenue of Mobile Games</h1>
+  <div class="controls-container">
+    <div class="game-selector-container">
+      <label for="gameSelector">Select a Game:</label>
+      <select id="gameSelector">
+        <option value="fgo">fgo</option>
+        <option value="原神">原神</option>
+        <option value="少女前线">少女前线</option>
+        <option value="崩坏3">崩坏3</option>
+        <option value="明日方舟">明日方舟</option>
+        <option value="星穹铁道">星穹铁道</option>
+        <option value="碧蓝航线">碧蓝航线</option>
+        <option value="蔚蓝档案">蔚蓝档案</option>
+      </select>
+    </div>
+
+    <div class="date-slider-container">
+      <label for="dateSlider">Select a Month:</label>
+      <span class="slider-label" id="startDateLabel"></span>
+      <input type="range" id="dateSlider" min="0" max="100" step="1" value="0">
+      <span class="slider-label" id="endDateLabel"></span>
+      <p id="selectedDate"></p>
+    </div>
+  </div>
+  <div id="map">
+    <!-- <svg></svg> -->
+  </div>
+  <script src="main.js"></script>
+</body>
+</html>
