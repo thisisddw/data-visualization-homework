@@ -1,11 +1,12 @@
 'use strict';
-import Choropleth from "./Choropleth.js"
+import Choropleth from "./Choropleth.js";
+import line_chart from "./line-chart.js";
 import * as d3 from "d3";
-import * as topojson from "topojson"
-import world from "./assets/countries-50m.json";
-import Legend from "./color-legend.js"
+import * as topojson from "topojson";
+import Legend from "./color-legend.js";
+import { computeMonthlySums, access_cache, load_data, get_date_range } from "./utils.js";
 
-import { load_data, get_date_range, get_max_value } from "./utils.js";
+import world from "./assets/countries-50m.json";
 
 const game = "原神";
 const year = 2021;
@@ -13,6 +14,24 @@ const month = 12;
 
 function update_map(game, year, month) {
     load_data(game, year, month).then(([data, min_max], error) => {
+        
+        function country_trend(name) {
+            const data = access_cache(`${name}/${game}`);
+            if(data) {
+                const svg = line_chart(data.slice(0, -1), {
+                    xval: (d) => new Date(d[0]),
+                    yval: (d) => d[1],
+                    xscale: d3.scaleUtc,
+                    ylabel: `${game} revenue in ${name}`,
+                });
+                d3.select(svg).insert("rect", ":first-child")
+                    .attr("fill", "white")
+                    .attr("width", "100%")
+                    .attr("height", "100%");
+                return svg;
+            }
+        }
+
         if (error) {
             console.log(error);
         } else {
@@ -33,7 +52,9 @@ function update_map(game, year, month) {
                 features: countries,
                 featureId: d => d.properties.name, // i.e., not ISO 3166-1 numeric
                 borders: countrymesh,
-                projection: d3.geoEqualEarth()
+                projection: d3.geoEqualEarth(),
+
+                info: country_trend
             });
             const {color} = chart.scales;
             const legend = Legend(color, {title: `${game} revenue in ${year}/${month}`, width: 260})

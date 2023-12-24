@@ -20,7 +20,7 @@ const game2path = new Map([
 ]);
 
 // Function to compute the sum of values for each month
-function computeMonthlySums(data, countries) {
+export function computeMonthlySums(data, countries) {
     const monthlySums = {};
   
     data.forEach(row => {
@@ -51,6 +51,13 @@ function load_game_data_with_cache(game)
             const csv = game2path.get(game);
             d3.csv(csv).then((data) => {
                 game_data_cache.set(game, data);
+
+                const countries = Object.keys(data[0]).slice(1);
+                const result = computeMonthlySums(data, countries);
+                countries.forEach((c) => {
+                    game_data_cache.set(`${c}/${game}`, d3.map(result, (d) => [d.month, d[c]]));
+                });
+
                 resolve(data);
             })
             .catch((error) => {
@@ -58,6 +65,10 @@ function load_game_data_with_cache(game)
             });
         }
     });
+}
+
+export function access_cache(game) {
+    return game_data_cache.get(game);
 }
 
 export function load_data(game, year, month)
