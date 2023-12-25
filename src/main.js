@@ -12,6 +12,13 @@ const game = "原神";
 const year = 2021;
 const month = 12;
 
+// const test_data = [[1,1],[2,3],[3,2]];
+// d3.select("#test").append(() => line_chart(test_data, {
+//     xval: (d) => d[0],
+//     yval: (d) => d[1],
+//     markers: [test_data[1]],
+// }));
+
 function update_map(game, year, month) {
     load_data(game, year, month).then(([data, min_max], error) => {
         
@@ -23,11 +30,14 @@ function update_map(game, year, month) {
                     yval: (d) => d[1],
                     xscale: d3.scaleUtc,
                     ylabel: `${game} revenue in ${name}`,
+                    strokeWidth: 3,
+                    markers: d3.filter(data, (d) => d[0] === `${year}/${month}`),
                 });
                 d3.select(svg).insert("rect", ":first-child")
                     .attr("fill", "white")
                     .attr("width", "100%")
-                    .attr("height", "100%");
+                    .attr("height", "100%")
+                    .attr("opacity", "85%");
                 return svg;
             }
         }
@@ -54,7 +64,9 @@ function update_map(game, year, month) {
                 borders: countrymesh,
                 projection: d3.geoEqualEarth(),
 
-                info: country_trend
+                info: country_trend,
+                // infoWidth: "40%",
+                // infoHeight: "40%",
             });
             const {color} = chart.scales;
             const legend = Legend(color, {title: `${game} revenue in ${year}/${month}`, width: 260})

@@ -14,6 +14,10 @@ function line_chart(data, {
     marginRight = 30,
     marginBottom = 30,
     marginLeft = 40,        
+    stroke = "steelblue",
+    strokeWidth = 1.5,
+
+    markers = [],
     } = {})
 {
 
@@ -63,9 +67,18 @@ function line_chart(data, {
     // Append a path for the line.
     svg.append("path")
         .attr("fill", "none")
-        .attr("stroke", "steelblue")
-        .attr("stroke-width", 1.5)
+        .attr("stroke", stroke)
+        .attr("stroke-width", strokeWidth)
         .attr("d", line(data));
+
+    // Add circle markers
+    svg.selectAll("circle")
+        .data(markers)
+        .join("circle")
+            .attr("fill", "red")
+            .attr("r", 7)
+            .attr("cx", (d) => x(xval(d)))
+            .attr("cy", (d) => y(yval(d)));
 
     return svg.node();
 }

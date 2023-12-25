@@ -27,6 +27,8 @@ function Choropleth(data, {
     strokeOpacity, // stroke opacity for borders
 
     info, // given featureId, returns a svg element with info to display
+    infoWidth = "50%",
+    infoHeight = "50%",
   } = {}) {
     // Compute values.
     const N = d3.map(data, id);
@@ -86,7 +88,6 @@ function Choropleth(data, {
             .attr("fill", (d, i) => color(V[Im.get(If[i])]))
             .attr("d", path)
             .on("mouseover", mouseover)
-            .on("click", clicked)
             .on("mouseout", reset)
         .append("title")
             .text((d, i) => title(d, Im.get(If[i])));
@@ -116,8 +117,8 @@ function Choropleth(data, {
     const info_layer = svg.append("g");
     info_layer.append("svg")
         .attr("id", "tip")
-        .attr("width", "30%")
-        .attr("height", "30%")
+        .attr("width", infoWidth)
+        .attr("height", infoHeight)
         .attr("display", "none");
     svg.on("pointermove", pointermoved);
         
@@ -139,28 +140,20 @@ function Choropleth(data, {
         d3.selectAll(".highlight").remove();
         info_layer.selectAll("svg").attr("display", "none");
     }
-    function pointermoved(event, d) {
-        const [x, y] = d3.pointer(event);
-        // console.log(event);
-
-        info_layer.select("svg")
-            .attr("x", x + 1)
-            .attr("y", y + 1);
+    function tip_location([x, y]) {
+        if (x > width/2)
+            x -= width/2;
+        return [x, y];
     }
-    function clicked(event, d) {
-        event.stopPropagation();
-        const name = featureId(d3.select(this).data()[0]);
-        const [x, y] = d3.pointer(event);
-        console.log(event, name, d);
-
+    function pointermoved(event, d) {
+        const [x, y] = tip_location(d3.pointer(event));
         info_layer.select("svg")
-            .attr("display", null)
-            .attr("x", x + 1)
-            .attr("y", y + 1);
+            .attr("x", d3.min([x, width/2]))
+            .attr("y", y);
     }
     function mouseover(event, d) {
         const name = d3.select(this).select("title").html().split("\n")[0];
-        const [x, y] = d3.pointer(event);
+        const [x, y] = tip_location(d3.pointer(event));
 
         reset();
 
@@ -170,11 +163,11 @@ function Choropleth(data, {
         const tip = info(name);
         if(tip) info_layer.append(() => tip)
             .attr("id", "tip")
-            .attr("width", "30%")
-            .attr("height", "30%")
+            .attr("width", infoWidth)
+            .attr("height", infoHeight)
             .attr("display", null)
-            .attr("x", x + 1)
-            .attr("y", y + 1);
+            .attr("x", x)
+            .attr("y", y);
     }
 }
 
