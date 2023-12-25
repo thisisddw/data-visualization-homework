@@ -64,9 +64,9 @@ function update_map(game, year, month) {
                 borders: countrymesh,
                 projection: d3.geoEqualEarth(),
 
-                info: country_trend,
-                // infoWidth: "40%",
-                // infoHeight: "40%",
+                tip: country_trend,
+                tipWidth: "45%",
+                tipHeight: "45%",
             });
             const {color} = chart.scales;
             const legend = Legend(color, {title: `${game} revenue in ${year}/${month}`, width: 260})

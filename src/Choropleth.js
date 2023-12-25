@@ -26,9 +26,9 @@ function Choropleth(data, {
     strokeWidth, // stroke width for borders
     strokeOpacity, // stroke opacity for borders
 
-    info, // given featureId, returns a svg element with info to display
-    infoWidth = "50%",
-    infoHeight = "50%",
+    tip, // given featureId, returns a svg element with tip to display
+    tipWidth = "50%",
+    tipHeight = "50%",
   } = {}) {
     // Compute values.
     const N = d3.map(data, id);
@@ -89,6 +89,7 @@ function Choropleth(data, {
             .attr("d", path)
             .on("mouseover", mouseover)
             .on("mouseout", reset)
+            .on("click", (event) => { event.stopPropagation(); })
         .append("title")
             .text((d, i) => title(d, Im.get(If[i])));
 
@@ -102,8 +103,8 @@ function Choropleth(data, {
         .attr("stroke-opacity", strokeOpacity)
         .attr("d", path(borders));
 
-    if(info === undefined)
-        info = (name) => {
+    if(tip === undefined)
+        tip = (name) => {
             const ret = d3.create("svg");
             ret.append("rect")
                     .attr("stroke", "black")
@@ -113,12 +114,16 @@ function Choropleth(data, {
             return ret.node();
         }
   
+    const numericTipWidth = Math.round(width * parseFloat(tipWidth.replace('%', '').trim()) / 100);
+    const numericTipHeight = Math.round(height * parseFloat(tipHeight.replace('%', '').trim()) / 100);
+    console.log(`tipw: ${numericTipWidth} tiph: ${numericTipHeight}`);
+
     const highlight_layer = svg.append("g");
-    const info_layer = svg.append("g");
-    info_layer.append("svg")
+    const tip_layer = svg.append("g");
+    tip_layer.append("svg")
         .attr("id", "tip")
-        .attr("width", infoWidth)
-        .attr("height", infoHeight)
+        .attr("width", tipWidth)
+        .attr("height", tipHeight)
         .attr("display", "none");
     svg.on("pointermove", pointermoved);
         
@@ -138,17 +143,17 @@ function Choropleth(data, {
     }
     function reset(event, d) {
         d3.selectAll(".highlight").remove();
-        info_layer.selectAll("svg").attr("display", "none");
+        tip_layer.selectAll("svg").attr("display", "none");
     }
     function tip_location([x, y]) {
-        if (x > width/2)
-            x -= width/2;
+        if (width - x < numericTipWidth)
+            x -= numericTipWidth;
         return [x, y];
     }
     function pointermoved(event, d) {
         const [x, y] = tip_location(d3.pointer(event));
-        info_layer.select("svg")
-            .attr("x", d3.min([x, width/2]))
+        tip_layer.select("svg")
+            .attr("x", x)
             .attr("y", y);
     }
     function mouseover(event, d) {
@@ -159,12 +164,12 @@ function Choropleth(data, {
 
         highlight(name, "gray");
         
-        info_layer.select("#tip").remove();
-        const tip = info(name);
-        if(tip) info_layer.append(() => tip)
+        tip_layer.select("#tip").remove();
+        const tip_svg = tip(name);
+        if(tip_svg) tip_layer.append(() => tip_svg)
             .attr("id", "tip")
-            .attr("width", infoWidth)
-            .attr("height", infoHeight)
+            .attr("width", tipWidth)
+            .attr("height", tipHeight)
             .attr("display", null)
             .attr("x", x)
             .attr("y", y);
